@@ -1,0 +1,103 @@
+\documentclass{standalone}
+    % Packages
+        \usepackage{etoolbox}
+        \usepackage{fp}
+        \usepackage{xcolor}
+        \usepackage{tikz}
+        \usetikzlibrary{patterns,decorations.text,calc,backgrounds}
+        \usepackage{adforn}
+        \usepackage{fontspec}
+        \setmainfont{QTChanceryType}
+    % Angles and rays
+        \def\InRay{82}
+        \def\OutRay{226}
+        \def\AngSli{360/18}
+        \def\AngRot{5*\AngSli}
+        \def\AngSta{\AngS*\AngSli+\AngRot}
+        \def\AngEnd{(\AngS+1)*\AngSli+\AngRot}
+    % Colors
+        \newcommand{\ColorDef}[3]{\definecolor{col#1}{HTML}{#3}\csdef{COL#1}{#2}}
+        \ColorDef{1}{RED}{FF0000}
+        \ColorDef{2}{orange-red}{FF3700}
+        \ColorDef{3}{red-orange}{FF6E00}
+        \ColorDef{4}{Orange}{FFA500}
+        \ColorDef{5}{yellow-orange}{FFC300}
+        \ColorDef{6}{orange-yellow}{FFE100}
+        \ColorDef{7}{YELLOW}{FFFF00}
+        \ColorDef{8}{green-yellow}{AA9900}
+        \ColorDef{9}{yellow-green}{558C00}
+        \ColorDef{10}{Green}{008000}
+        \ColorDef{11}{blue-green}{005555}
+        \ColorDef{12}{green-blue}{002BAA}
+        \ColorDef{13}{BLUE}{0000FF}
+        \ColorDef{14}{purple-blue}{2B00D5}
+        \ColorDef{15}{blue-purple}{5500AA}
+        \ColorDef{16}{Purple}{800080}
+        \ColorDef{17}{red-purple}{AA0055}
+        \ColorDef{18}{purple-red}{D5002B}
+    % Sector code
+        \newcommand{\Sector}[1]{
+            \def\AngS{-#1}
+            % Sector
+                \begin{scope}[on background layer]
+                    \fill[col#1] ({\AngSta}:\OutRay) arc [start angle={\AngSta},end angle={\AngEnd},radius=\OutRay] -- ({\AngEnd}:\InRay) arc [start angle={\AngEnd},end angle={\AngSta},radius=\InRay] -- cycle;
+                \end{scope}
+            % Sector number
+                \node[circle,inner sep=0pt] at ({\AngS*\AngSli+5.\AngRot}:\InRay-7) {#1};
+            % Sector name
+                \ifnumgreater{\n}{5}{\ifnumless{\n}{15}{\def\NPOS{}}{\def\NPOS{reverse path}}}{\def\NPOS{reverse path}}
+                \path[postaction={decorate,decoration={text along path,\NPOS,raise=-3.1pt,text align=center,text={|\Large\strut|\csuse{COL#1}}}}] ({\AngSta}:{\OutRay+(\OutRay-\InRay)/10*0.75}) arc [start angle={\AngSta},end angle={\AngEnd},radius={\OutRay+(\OutRay-\InRay)/10*0.75}];
+            % Rays
+                \draw[black] ({#1*\AngSli}:\InRay)--({#1*\AngSli}:\OutRay)--({#1*\AngSli}:{\OutRay+(\OutRay-\InRay)/10*1.5});
+        }
+    % Circles code
+        \newcommand{\Circles}[1]{
+            % Circles
+                \draw[black] (O) circle[radius=#1*(\OutRay-\InRay)/10+\InRay];
+                \FPeval\InCirc{trunc(20-#1*2:0)}
+                \FPeval\InCircP{trunc(\InCirc+1:0)}
+                \ifnumequal{#1}{10}{}{\foreach \c in {1,...,\InCirc} {\draw[black,line width=0.2pt] (O) circle[radius=#1*(\OutRay-\InRay)/10+\InRay+\c*(\OutRay-\InRay)/10/\InCircP];}}
+            % Inside numbers
+                \ifnumequal{#1}{0}{}{\FPeval\inlabel{trunc(#1*2:0)}
+                    \foreach \dir in {90,270} {\node at ([shift={(\dir:{(\OutRay-\InRay)/20+\OutRay-0.5*\inlabel*(\OutRay-\InRay)/10})}]O) {\inlabel};}
+                }
+        }
+    % Triangles
+        \def\Ts{45}
+        \def\Tsh{20}
+        \newcommand{\pathtr}[1]{(#1t1)--(#1t2)--(#1t3)--cycle}
+        \newcommand{\drawtr}[2]{
+            \coordinate (Tr) at ([shift={(#2:\Tsh)}]O);
+            \coordinate (#1t1) at ([shift={(30:\Ts)}]Tr);
+            \coordinate (#1t2) at ([shift={(150:\Ts)}]Tr);
+            \coordinate (#1t3) at ([shift={(270:\Ts)}]Tr);
+            \filldraw[fill=#1,draw=black] \pathtr{#1};
+        }
+\begin{document}
+\begin{tikzpicture}[x=1pt,y=1pt,line width=1pt]
+    \coordinate (O) at (0,0);
+    % Sectors and rays
+        \foreach \n in {1,2,...,17,18} {\Sector{\n}}
+    % Circles and inside numbers
+        \foreach \n in {0,1,2,...,10} {\Circles{\n}}
+    % Triangles
+        \begin{scope}[blend group=darken]
+            \drawtr{col1}{90}
+            \drawtr{col7}{330}
+            \drawtr{col13}{210}
+        \end{scope}
+        \draw[pattern=vertical lines]   \pathtr{col1};
+        \draw[pattern=dots]             \pathtr{col7};
+        \draw[pattern=horizontal lines] \pathtr{col13};
+    % Segments
+        \foreach \ang in {90,330,210} {\draw ([shift={(\ang:\Ts)}]O)--++(\ang:22);}
+    % Bounding box
+        \def\BB{260}
+        \draw[opacity=0] (-\BB,-1.2*\BB) coordinate (BBbl) rectangle (\BB,1.2*\BB) coordinate (BBtr);
+        \coordinate (BBtl) at (BBbl|-BBtr);
+        \coordinate (BBbr) at (BBbl-|BBtr);
+    % Text
+        \node[below,font=\fontsize{30pt}{30pt}\selectfont] at ($(BBtl)!0.5!(BBtr)$) {\adfhangingflatleafright\ PRISMATIC \adfhangingflatleafleft};
+        \node[above]  at ($(BBbl)!0.5!(BBbr)$) {Inspired by Moses Harris' ``Prismatic'' in \textit{The Natural System of Colours} (1766)};
+\end{tikzpicture}
+\end{document}
