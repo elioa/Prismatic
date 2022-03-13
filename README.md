@@ -4,6 +4,6 @@ My LaTeX rendition of Moses Harris’ “Prismatic” in _The Natural System of 
 
 [Wikipedia page](https://en.wikipedia.org/wiki/Moses_Harris)
 
-![alt text](https://github.com/elioa/Prismatic/tree/main/Prismatic.png "Prismatic")
+![Prismatic](https://github.com/elioa/Prismatic/blob/main/Prismatic.png "Prismatic converted in png")
 
 To compile use `xelatex`.
